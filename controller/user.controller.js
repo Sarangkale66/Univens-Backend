@@ -1,4 +1,5 @@
 const { User, validateUser } = require('../model/user.model');
+const mail=require('../config/NodeMailer.config');
 
 module.exports.CreateUserResponse = async (req, res, next) => {
   try {
@@ -22,6 +23,8 @@ module.exports.CreateUserResponse = async (req, res, next) => {
     res.status(201).json({
       message: "User created successfully",
     });
+
+    if(!mail(email)) throw new Error("Email not send to the user");
   } catch (err) {
     res.status(500).json({
       message: "Failed to create user",
