@@ -19,6 +19,7 @@
   "homepage": "https://github.com/Sarangkale66/Univens-Backend#readme",
   "dependencies": {
     "@supabase/supabase-js": "^2.48.0",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "joi": "^17.13.3",

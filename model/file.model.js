@@ -6,7 +6,7 @@ const schema = mongoose.Schema;
 const fileModel = schema({
   lookingFor: {
     type: String,
-    enum: ['IT Services', 'HR Solutions', 'Marketing Services', 'other'],
+    enum: ['IT Services', 'HR Solutions', 'Marketing Services', 'Other Services'],
     required: true,
   },
   description: {
@@ -18,7 +18,7 @@ const fileModel = schema({
   },
   communicationChannel: {
     type: String,
-    enum: ['email', 'phoneCall', 'videoCall', 'whatsApp'],
+    enum: ['Email', 'Phone Call', 'Video Call', 'WhatsApp', 'Slack'],
   },
 });
 
@@ -27,12 +27,12 @@ const File = mongoose.model('file', fileModel);
 const validateFile = (data) => {
   const schema = Joi.object({
     lookingFor: Joi.string()
-      .valid('IT Services', 'HR Solutions', 'Marketing Services', 'other')
+      .valid('IT Services', 'HR Solutions', 'Marketing Services', 'Other Services')
       .required(),
     description: Joi.string().required(),
     file: Joi.array().items(Joi.string()).optional(), 
     communicationChannel: Joi.string()
-      .valid('email', 'phoneCall', 'videoCall', 'whatsApp')
+      .valid('Email', 'Phone Call', 'Video Call', 'WhatsApp', 'Slack')
       .optional(),
   });
 
