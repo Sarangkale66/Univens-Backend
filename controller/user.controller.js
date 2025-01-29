@@ -3,8 +3,8 @@ const mail=require('../config/NodeMailer.config');
 
 module.exports.CreateUserResponse = async (req, res, next) => {
   try {
-    const { fullname, companyName, role, email, phoneNumber, websiteLink, fileId } = req.body;
-
+    const { fullname, companyName, role, email, phoneNumber, websiteLink, fileId } = req.body; 
+    
     const { error } = validateUser({ fullname, companyName, role, email, phoneNumber, websiteLink });
     if (error) {
       return res.status(400).json({ message: error.details[0].message });
