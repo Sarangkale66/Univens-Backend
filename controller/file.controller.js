@@ -4,9 +4,9 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_API
 
 module.exports.CreateFile = async (req, res, next) => {
   try {
-    const { lookingFor, description, communicationChannel } = req.body;
+    const { lookingFor, description } = req.body;
 
-    const { error: validationError } = validateFile({ lookingFor, description, communicationChannel });
+    const { error: validationError } = validateFile({ lookingFor, description });
     if (validationError) {
       return res.status(400).json({ message: validationError.details[0].message });
     }
@@ -34,7 +34,6 @@ module.exports.CreateFile = async (req, res, next) => {
       lookingFor,
       description,
       file: filePaths,
-      communicationChannel,
     });
 
     res.status(201).json({

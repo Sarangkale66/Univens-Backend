@@ -2,9 +2,18 @@ require('dotenv').config()
 const express=require('express');
 const cors = require('cors')
 const app=express();
+const cookieParser = require('cookie-parser');
+
 app.use(cors())
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
+app.use(cookieParser());
+app.use((req, res, next) => {
+  if (req.url === "/favicon.ico") {
+    return res.status(204).end(); 
+  }
+  next();
+});
 
 const connectDB = require('./config/mongdb.connection')
 connectDB();

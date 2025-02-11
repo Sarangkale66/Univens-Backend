@@ -6,7 +6,24 @@ const schema = mongoose.Schema;
 const fileModel = schema({
   lookingFor: {
     type: String,
-    enum: ['IT Services', 'HR Solutions', 'Marketing Services', 'Other Services'],
+    enum: [
+      "Branding & Marketing",
+      "Business Strategy & Planning",
+      "Customer Experience",
+      "Customer Support",
+      "Funding & Investment",
+      "Innovation",
+      "Sustainability",
+      "Legal & Compliance",
+      "Operations & Efficiency",
+      "Product Development",
+      "Risk Management",
+      "Sales",
+      "Growth",
+      "Talent Acquisition",
+      "Tech Integration",
+      "Something else.."
+    ],
     required: true,
   },
   description: {
@@ -16,10 +33,6 @@ const fileModel = schema({
   file: {
     type: [String], 
   },
-  communicationChannel: {
-    type: String,
-    enum: ['Email', 'Phone Call', 'Video Call', 'WhatsApp', 'Slack'],
-  },
 });
 
 const File = mongoose.model('file', fileModel);
@@ -27,13 +40,25 @@ const File = mongoose.model('file', fileModel);
 const validateFile = (data) => {
   const schema = Joi.object({
     lookingFor: Joi.string()
-      .valid('IT Services', 'HR Solutions', 'Marketing Services', 'Other Services')
+      .valid("Branding & Marketing",
+      "Business Strategy & Planning",
+      "Customer Experience",
+      "Customer Support",
+      "Funding & Investment",
+      "Innovation",
+      "Sustainability",
+      "Legal & Compliance",
+      "Operations & Efficiency",
+      "Product Development",
+      "Risk Management",
+      "Sales",
+      "Growth",
+      "Talent Acquisition",
+      "Tech Integration",
+      "Something else..")
       .required(),
     description: Joi.string().required(),
     file: Joi.array().items(Joi.string()).optional(), 
-    communicationChannel: Joi.string()
-      .valid('Email', 'Phone Call', 'Video Call', 'WhatsApp', 'Slack')
-      .optional(),
   });
 
   return schema.validate(data);
