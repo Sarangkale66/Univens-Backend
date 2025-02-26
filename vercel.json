@@ -3,10 +3,6 @@
   "name": "native-server",
   "builds": [{ "src": "app.js", "use": "@vercel/node" }],
   "routes": [
-    { "src": "/dashboard/read/(.*)", "dest": "/app.js" },
-    { "src": "/dashboard", "dest": "/app.js" },
-    { "src": "/file/create", "dest": "/app.js" },
-    { "src": "/user/create", "dest": "/app.js" },
     { "src": "/(.*)", "dest": "/app.js" }
   ]
 }
