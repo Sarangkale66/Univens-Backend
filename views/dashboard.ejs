@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List with File Selection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-4 sm:p-6 md:p-10">
+    <div class="max-w-2xl mx-auto bg-white p-5 rounded-lg shadow-md">
+        <div class="flex flex-wrap justify-center sm:justify-start border-b mb-4">
+            <button class="font-bold tab-btn px-4 py-2" data-tab="new">New</button>
+            <button class="tab-btn px-4 py-2" data-tab="inProgress">In Progress</button>
+            <button class="tab-btn px-4 py-2" data-tab="completed">Completed</button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-4 font-bold bg-gray-200 p-2 rounded mt-2">
+            <div>
+                <input type="checkbox" id="selectAll" class="mr-2">
+                Select
+            </div>
+            <div>Full Name</div>
+            <div>Company</div>
+            <div>Role</div>
+        </div>
+
+        <div id="task-container"></div>
+
+        <div class="flex justify-between mt-4">
+            <button id="prevPage" class="px-4 py-2 bg-gray-300 rounded" disabled>Previous</button>
+            <div>Pages: <span id="total"> </span></div>
+            <button id="nextPage" class="px-4 py-2 bg-blue-500 text-white rounded">Next</button>
+        </div>
+
+        <button onclick="downloadSelectedFiles()" class="mt-4 px-4 py-2 bg-green-500 text-white rounded">Download Selected</button>
+        <button onclick="downloadFiles()" class="mt-4 px-4 py-2 bg-green-500 text-white rounded">Download All</button>
+    </div>
+
+    <script>
+        let usersCache = {};
+        let currentPage = 1;
+        let currentTab = 'new';
+        const pageSize = 50;
+        const selectedUsers = new Set();
+        const total = document.getElementById('total');
+        let totalPages = {};
+
+        async function fetchUsers(page, status) {
+            if (usersCache[status]?.[page]) {
+                renderTasks(status);
+                return;
+            }
+            try {
+                const response = await fetch(`/user?page=${page}&limit=${pageSize}&status=${status}`);
+                const data = await response.json();
+                if (!data.users || data.users.length === 0) {
+                    currentPage--;
+                    document.getElementById('nextPage').disabled = true;
+                }
+                if (!usersCache[status]) usersCache[status] = {};
+                totalPages[status] = data.totalPages;
+                usersCache[status][page] = data.users;
+                renderTasks(status);
+            } catch (error) {
+                console.error('Error fetching users:', error);
+            }
+        }
+
+        function renderTasks(status) {
+            currentTab = status;
+            const container = document.getElementById('task-container');
+            container.innerHTML = '';
+            const users = usersCache[status]?.[currentPage] || [];
+            total.innerText = `${currentPage}/ ${totalPages[status]}`;
+            container.innerHTML = users.length
+                ? users.map(user => `
+                    <div class='grid grid-cols-1 sm:grid-cols-4 p-2 border-b hover:bg-gray-200' onclick="redirectToDashboard('${user._id}')">
+                        <div>
+                            <input type="checkbox" class="user-checkbox" value="${user._id}" ${selectedUsers.has(user._id) ? 'checked' : ''} onclick="event.stopPropagation()">
+                        </div>
+                        <div>${user.fullname}</div>
+                        <div>${user.companyName}</div>
+                        <div>${user.role}</div>
+                    </div>
+                `).join('')
+                : "<div class='text-gray-500 p-2'>No tasks found</div>";
+
+            document.querySelectorAll('.user-checkbox').forEach(cb => {
+                cb.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        selectedUsers.add(e.target.value);
+                    } else {
+                        selectedUsers.delete(e.target.value);
+                    }
+                });
+            });
+
+            document.getElementById('prevPage').disabled = currentPage === 1;
+            document.getElementById('nextPage').disabled = users.length < pageSize;
+        }
+
+        function redirectToDashboard(id) {
+            window.location.href = `http://localhost:8080/dashboard/read/${id}`;
+        }
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('font-bold'));
+                e.target.classList.add('font-bold');
+                currentPage = 1;
+                fetchUsers(currentPage, e.target.dataset.tab);
+            });
+        });
+
+        document.getElementById('nextPage').addEventListener('click', () => {
+            currentPage++;
+            fetchUsers(currentPage, currentTab);
+        });
+
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                document.getElementById('nextPage').disabled = false;
+                renderTasks(currentTab);
+            }
+        });
+
+        document.getElementById('selectAll').addEventListener('change', (e) => {
+            const checkboxes = document.querySelectorAll('.user-checkbox');
+            if (e.target.checked) {
+                checkboxes.forEach(cb => {
+                    cb.checked = true;
+                    selectedUsers.add(cb.value);
+                });
+            } else {
+                checkboxes.forEach(cb => {
+                    cb.checked = false;
+                    selectedUsers.delete(cb.value);
+                });
+            }
+        });
+
+        async function downloadSelectedFiles() {
+            const selectedIds = Array.from(selectedUsers);
+            if (selectedIds.length === 0) {
+                alert('Please select at least one user to download.');
+                return;
+            }
+
+            const response = await fetch('/user/download-selected-users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userIds: selectedIds })
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'selected_users.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            } else {
+                alert('Failed to download selected users.');
+            }
+        }
+
+        async function downloadFiles() {
+            const response = await fetch('/user/download-selected-users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userIds: "All" })
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                console.log(url);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'selected_users.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            } else {
+                alert('Failed to download selected users.');
+            }
+        }
+
+        fetchUsers(currentPage, currentTab);
+    </script>
+</body>
+</html>
+
+
