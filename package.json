@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app.js"
+    "start": "nodemon app.js",
+    "build:css":"npx @tailwindcss/cli -i ./public/style/input.css -o ./public/style/output.css --watch"
   },
   "repository": {
     "type": "git",
@@ -19,6 +20,7 @@
   "homepage": "https://github.com/Sarangkale66/Univens-Backend#readme",
   "dependencies": {
     "@supabase/supabase-js": "^2.48.0",
+    "@tailwindcss/cli": "^4.0.9",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
@@ -30,5 +32,10 @@
     "nodemailer": "^6.9.16",
     "uuid": "^11.0.5",
     "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.0.9"
   }
 }
