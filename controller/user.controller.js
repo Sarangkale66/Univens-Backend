@@ -1,9 +1,9 @@
 const { User, validateUser } = require('../model/user.model');
-<<<<<<< HEAD
-=======
+ 
+ 
 const xlsx = require('xlsx');
 const path = require('path');
->>>>>>> main
+ 
 const mail=require('../config/NodeMailer.config');
 
 module.exports.getUsers = async (req, res, next) => {
