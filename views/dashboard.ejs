@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/style/output.css">
 </head>
 <body class="bg-gray-100 p-4 sm:p-6 md:p-10">
-    <div class="max-w-2xl mx-auto bg-white p-5 rounded-lg shadow-md">
+    <div class="max-w-full mx-auto bg-white p-5 rounded-lg shadow-md">
         <div class="flex flex-wrap justify-center sm:justify-start border-b mb-4">
             <button class="font-bold tab-btn px-4 py-2" data-tab="new">New</button>
             <button class="tab-btn px-4 py-2" data-tab="inProgress">In Progress</button>
@@ -58,6 +58,7 @@
                     currentPage--;
                     document.getElementById('nextPage').disabled = true;
                 }
+                console.log(data);
                 if (!usersCache[status]) usersCache[status] = {};
                 totalPages[status] = data.totalPages;
                 usersCache[status][page] = data.users;
@@ -101,7 +102,7 @@
         }
 
         function redirectToDashboard(id) {
-            window.location.href = `http://localhost:8080/dashboard/read/${id}`;
+            window.location.href = `/dashboard/read/${id}`;
         }
 
         document.querySelectorAll('.tab-btn').forEach(btn => {

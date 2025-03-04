@@ -26,10 +26,15 @@ const indexRoute = require('./routes/index.route');
 const userRoute = require('./routes/user.route');
 const fileRoute = require('./routes/file.route');
 const dashboardRoute = require('./routes/dashboard.route');
+const authRoute = require('./routes/auth.route');
+const authMiddleware =  require('./middleware/auth.middleware')
 
+
+
+app.use("/auth",authRoute);
 app.use("/dashboard",dashboardRoute);
-app.use("/user",userRoute);
 app.use("/file",fileRoute);
+app.use("/user",authMiddleware.isAuthenticated,userRoute);
 app.use("/",indexRoute);
 
 

@@ -4,8 +4,8 @@ const router = express.Router();
 
 const fileController = require('../controller/file.controller');
 
-router.put('/update/:id',upload.any(),fileController.UpdateFile);
 router.post('/create',upload.any(),fileController.CreateFile);
+router.put('/update/:id',upload.any(),fileController.UpdateFile);
 router.post('/deleteSupaFile/:id?',fileController.DeleteSupaFile);
 
 module.exports = router;

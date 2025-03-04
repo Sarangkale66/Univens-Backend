@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon app.js",
-    "build:css":"npx @tailwindcss/cli -i ./public/style/input.css -o ./public/style/output.css --watch"
+    "build:css": "npx @tailwindcss/cli -i ./public/style/input.css -o ./public/style/output.css --watch"
   },
   "repository": {
     "type": "git",
@@ -21,12 +21,16 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.48.0",
     "@tailwindcss/cli": "^4.0.9",
+    "axios": "^1.8.1",
+    "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "ejs": "^3.1.10",
     "express": "^4.21.2",
+    "googleapis": "^146.0.0",
     "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.5",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.16",

@@ -1,6 +1,3 @@
-const visitorSchema = require("../model/visitor.model");
-const mongoose = require("mongoose");
-
 module.exports.indexControl = async (req, res, next) => {
   try {
     res.send("helloworld");
@@ -9,3 +6,4 @@ module.exports.indexControl = async (req, res, next) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+

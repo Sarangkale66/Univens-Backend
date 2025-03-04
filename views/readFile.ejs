@@ -248,6 +248,7 @@
     document.getElementById("updateFileForm").addEventListener("submit", async (e) => {
         e.preventDefault();
         const formData = new FormData();
+        formData.append('user', document.getElementById("lookingFor").value);
         formData.append('lookingFor', document.getElementById("lookingFor").value);
         formData.append('description', document.getElementById("description").value);
 

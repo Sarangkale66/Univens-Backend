@@ -3,10 +3,17 @@
   "name": "native-server",
   "builds": [{ "src": "app.js", "use": "@vercel/node" }],
   "routes": [
-    { "src": "/dashboard/read/(.*)", "dest": "/app.js" },
     { "src": "/dashboard", "dest": "/app.js" },
+    { "src": "/dashboard/read/(.*)", "dest": "/app.js" },
     { "src": "/file/create", "dest": "/app.js" },
+    { "src": "/file/update/(.*)", "dest": "/app.js" },
+    { "src": "/file/deleteSupaFile/(.*)", "dest": "/app.js" },
+    { "src": "/user", "dest": "/app.js" },
     { "src": "/user/create", "dest": "/app.js" },
+    { "src": "/user/download-selected-users", "dest": "/app.js" },
+    { "src": "/user/delete/(.*)", "dest": "/app.js" },
+    { "src": "/user/update/(.*)", "dest": "/app.js" },
+    { "src": "/user/update-status/(.*)", "dest": "/app.js" },
     { "src": "/(.*)", "dest": "/app.js" }
   ]
 }

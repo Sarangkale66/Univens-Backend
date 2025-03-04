@@ -1,13 +1,13 @@
 const { File, validateFile } = require('../model/file.model');
-const { User , validateUser } = require('../model/user.model');
+const { User, validateUser } = require('../model/user.model');
 const { createClient } = require('@supabase/supabase-js');
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_API_KEY);
 
 module.exports.CreateFile = async (req, res, next) => {
   try {
-    const { lookingFor, description } = req.body;
+    const { lookingFor, description, userId, status } = req.body;
 
-    const { error: validationError } = validateFile({ lookingFor, description });
+    const { error: validationError } = validateFile({ lookingFor, description, userId, status });
     if (validationError) {
       return res.status(400).json({ message: validationError.details[0].message });
     }
@@ -35,6 +35,8 @@ module.exports.CreateFile = async (req, res, next) => {
       lookingFor,
       description,
       file: filePaths,
+      userId,
+      status: status || 'new',
     });
 
     res.status(201).json({
@@ -48,14 +50,14 @@ module.exports.CreateFile = async (req, res, next) => {
     });
     next(err);
   }
-}
+};
 
 module.exports.UpdateFile = async (req, res, next) => {
   try {
-    const { lookingFor, description, oldFileUrl } = req.body;
+    const { lookingFor, description, oldFileUrl, status } = req.body;
     const { id } = req.params;
 
-    const { error: validationError } = validateFile({ lookingFor, description });
+    const { error: validationError } = validateFile({ lookingFor, description, status });
     if (validationError) {
       return res.status(400).json({ message: validationError.details[0].message });
     }
@@ -63,7 +65,7 @@ module.exports.UpdateFile = async (req, res, next) => {
     let fileDoc;
     const user = await User.findById(id);
     if (user) {
-      fileDoc = await File.findById(user.fileId);
+      fileDoc = await File.findOne({ userId: id });
     } else {
       fileDoc = await File.findById(id);
     }
@@ -74,6 +76,7 @@ module.exports.UpdateFile = async (req, res, next) => {
 
     fileDoc.lookingFor = lookingFor;
     fileDoc.description = description;
+    fileDoc.status = status;
 
     if (oldFileUrl || (req.files && req.files.length > 0)) {
       if (oldFileUrl) {
@@ -135,9 +138,9 @@ module.exports.UpdateFile = async (req, res, next) => {
     });
     next(err);
   }
-}
+};
 
-module.exports.DeleteSupaFile = async (req, res, next) =>{
+module.exports.DeleteSupaFile = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { fileUrl } = req.body;
@@ -145,7 +148,7 @@ module.exports.DeleteSupaFile = async (req, res, next) =>{
     let fileDoc;
     const user = await User.findById(id);
     if (user) {
-      fileDoc = await File.findById(user.fileId);
+      fileDoc = await File.findOne({ userId: id });
     } else {
       fileDoc = await File.findById(id);
     }
@@ -187,4 +190,4 @@ module.exports.DeleteSupaFile = async (req, res, next) =>{
     });
     next(err);
   }
-}
+};
