@@ -11,25 +11,28 @@ const notificationSchema = new schema(
     receiverId: {
       type: schema.Types.ObjectId,
       ref: 'user',
-      required: true,
+      default: null,
     },
     message: {
       type: String,
       required: true,
       trim: true,
     },
-    isRead: {
-      type: Boolean,
-      default: false,
+    receiverEmail: {
+      type: String,
+      trim: true,
     },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-      expires: 7 * 24 * 60 * 60, 
+    type: {
+      type: String,
+      enum: ["message", "invite", "wish"],
+      default: "message", 
     },
+    expiresAt: { type: Date, default: null }, 
   },
-  { timestamps: true }
+  { timestamps: true } 
 );
+
+notificationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 const Notification = mongoose.model('notification', notificationSchema);
 

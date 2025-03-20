@@ -6,7 +6,7 @@ const html = `
   <img src="${process.env.SRC}" width="400">
   `; 
 
-const mail=async(sender)=>{
+const mail=async(sender, context)=>{
   try{
     const transporter = nodeMailer.createTransport({
       service:'gmail',
@@ -21,8 +21,8 @@ const mail=async(sender)=>{
     const info = await transporter.sendMail({
       from:process.env.FROM,
       to:sender,
-      subject:'Thank You For Visiting Univens',
-      html: html, 
+      subject:(context) ? "Join Univens Now" : 'Thank You For Visiting Univens',
+      html: context||html, 
     });
     return true;
   }catch(err){

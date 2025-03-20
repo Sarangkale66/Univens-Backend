@@ -1,4 +1,5 @@
 const { User, validateUser } = require('../model/user.model');
+const Notification = require("../model/notification.model");
 const { File } = require('../model/file.model');
 const xlsx = require('xlsx');
 const path = require('path');
@@ -43,7 +44,7 @@ module.exports.getTeam =async(req,res)=>{
   try {
     const userId = req.user._id; 
 
-    const user = await User.findById(userId).populate('team.memberId', 'fullname email role');
+    const user = await User.findById(userId).populate('team.memberId', 'image companyName gender address phoneNumber websiteLink');
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -55,6 +56,39 @@ module.exports.getTeam =async(req,res)=>{
   }
 }
 
+module.exports.deleteTeamMember = async (req, res, next) => {
+  try {
+    const userId = req.user?._id;
+    const { memberId, email } = req.query;
+
+    if (!userId || (!memberId && !email)) {
+      return res.status(400).json({ message: "User ID and either member ID or email are required." });
+    }
+
+    const user = await User.findById(userId, { team: 1 });
+    if (!user) return res.status(404).json({ message: "User not found." });
+
+    user.team = user.team.filter(
+      (member) =>
+        !(memberId && member.memberId?.toString() === memberId) &&
+        !(email && member.email === email)
+    );
+
+    await user.save();
+
+    await Notification.findOneAndDelete({
+      senderId: userId,
+      $or: [{ receiverId: memberId }, { receiverEmail: email }],
+    });
+
+    res.status(200).json({ message: "Team member removed successfully." });
+
+  } catch (err) {
+    next(err);
+  }
+};
+
+
 module.exports.searchUser = async (req, res, next) => {
   try {
     const { email } = req.query;
@@ -65,13 +99,159 @@ module.exports.searchUser = async (req, res, next) => {
 
     if (!user) return res.status(200).json({ message: 'User not found' });
     
+    const { password, fileIds, team, ...filteredUser } = user.toObject();
     res.status(200).json({
       message: "success",
-      user
+      user: filteredUser
     });
 
   } catch (err) {
     next(err); 
+  }
+};
+
+module.exports.sendEmail = async(req,res,next)=>{
+  try{
+    const { email1 } = req.user;
+    const { email, role, fullname } = req.body;
+    context = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Invitation</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          line-height: 1.6;
+          color: #333333;
+          margin: 0;
+          padding: 0;
+        }
+        .container {
+          max-width: 600px;
+          margin: 0 auto;
+          padding: 20px;
+          background-color: #ffffff;
+        }
+        .header {
+          text-align: center;
+          padding: 20px 0;
+          background-color: #f8f9fa;
+          border-radius: 5px;
+        }
+        .content {
+          padding: 20px 0;
+        }
+        .button {
+          display: inline-block;
+          padding: 10px 20px;
+          margin: 20px 0;
+          background-color: #4CAF50;
+          color: white !important;
+          text-decoration: none;
+          border-radius: 5px;
+          font-weight: bold;
+        }
+        .footer {
+          margin-top: 30px;
+          text-align: center;
+          font-size: 12px;
+          color: #999999;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>You're Invited!</h1>
+        </div>
+        <div class="content">
+          <p>Hello ${fullname},</p>
+          <p>You have been invited to join our platform as a <strong>${role}</strong>.</p>
+          <p>This invitation was sent by ${email1}. We're excited to have you on board!</p>
+          
+          <p>To accept this invitation and create your account, please click the button below:</p>
+          
+          <div style="text-align: center;">
+            <a href="https://univens.in" class="button">Join UNIVENS</a>
+          </div>
+          
+          <p>If you have any questions or need assistance, please don't hesitate to contact us.</p>
+          
+          <p>Best regards,<br>
+          The Team</p>
+        </div>
+        <div class="footer">
+          <p>If you received this email by mistake, please disregard it. No action is required.</p>
+          <p>© 2025 Your Company. All rights reserved.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+    `;
+    await mail(email, context);
+    res.json({
+      message:"success",
+    })
+    
+  }catch(err){
+    next(err);
+  }
+}
+
+module.exports.addTeamMember = async (req, res, next) => {
+  try {
+    const senderId = req.user._id;
+    const { fullname, email, _id, isInvited, isMember, role, message } = req.body;
+
+    if (!fullname || !email) {
+      return res.status(400).json({ message: "Fullname and email are required" });
+    }
+
+    const sender = await User.findById(senderId, { team: 1 });
+
+    const isAlreadyMember = sender.team.some(member => member.email === email);
+
+    if (isAlreadyMember) {
+      return res.status(400).json({ message: "Member already present in the team" });
+    }
+
+    let obj = {
+      senderId: senderId,
+      receiverEmail: email,
+      message: message,
+      type: "invite",
+    };
+
+    if (isMember) obj.receiverId = _id;
+
+    await Notification.create(obj);
+
+    const updatedUser = await User.findByIdAndUpdate(
+      senderId,
+      {
+        $push: {
+          team: {
+            memberId: _id || null,
+            fullname,
+            email,
+            role: role || "Role Not Mentioned",
+            requestType: "pending",
+          },
+        },
+      },
+      { new: true, projection: { team: 1 } }
+    ).populate('team.memberId', 'image companyName gender address phoneNumber websiteLink');
+
+    res.status(200).json({
+      message: "success",
+      team: updatedUser?.team || [],
+    });
+
+  } catch (err) {
+    next(err);
   }
 };
 

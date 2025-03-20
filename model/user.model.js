@@ -62,6 +62,7 @@ const userModel = schema(
         memberId: {
           type: schema.Types.ObjectId,
           ref:"user",
+          default:null,
         },
         fullname: {
           type: String,
@@ -73,16 +74,18 @@ const userModel = schema(
           required: true,
           lowercase: true,
           trim: true,
+          unique:false,
         },
         role:{
           type:String,
           required:true,
           trim: true,
         },
-        isMember: {
-          type: Boolean,
-          required: true,
-        },
+        requestType:{
+          type:String,
+          enum:["pending","accepted","declined"],
+          default:"pending",
+        }
       },
     ],
     fileIds: [

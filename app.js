@@ -27,15 +27,18 @@ const userRoute = require('./routes/user.route');
 const fileRoute = require('./routes/file.route');
 const dashboardRoute = require('./routes/dashboard.route');
 const authRoute = require('./routes/auth.route');
+const notificationRoute = require('./routes/notification.route')
+
 const authMiddleware =  require('./middleware/auth.middleware')
 
 
-
+app.use("/",indexRoute);
 app.use("/auth",authRoute);
+app.use(authMiddleware.isAuthenticated);
 app.use("/dashboard",dashboardRoute);
 app.use("/file",fileRoute);
-app.use("/user",authMiddleware.isAuthenticated,userRoute);
-app.use("/",indexRoute);
+app.use("/notification",notificationRoute)
+app.use("/user",userRoute);
 
 
 const port = process.env.PORT||3000;

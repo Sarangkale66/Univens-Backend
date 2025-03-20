@@ -4,10 +4,13 @@ const { createClient } = require('@supabase/supabase-js');
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_API_KEY);
 
 module.exports.CreateFile = async (req, res, next) => {
+  console.log(req.body, req.user);
+  
   try {
-    const { lookingFor, description, userId, status } = req.body;
+    const userId = req.user._id;
+    const { lookingFor, description, status } = req.body;
 
-    const { error: validationError } = validateFile({ lookingFor, description, userId, status });
+    const { error: validationError } = validateFile({ lookingFor, description, userId:String(userId), status });
     if (validationError) {
       return res.status(400).json({ message: validationError.details[0].message });
     }
@@ -39,9 +42,12 @@ module.exports.CreateFile = async (req, res, next) => {
       status: status || 'new',
     });
 
+    const user = await User.findByIdAndUpdate(userId, { $push: { fileIds: createdFile._id } }, { new: true });
+
     res.status(201).json({
       message: 'File created successfully',
       data: createdFile,
+      fileLen:user.fileIds.length,
     });
   } catch (err) {
     res.status(500).json({

@@ -35,7 +35,7 @@ const fileModel = schema({
   },
   userId: {
     type: schema.Types.ObjectId,
-    ref: "User",
+    ref: "user",
     required: true,
   },
   status: {
