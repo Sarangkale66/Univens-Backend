@@ -58,6 +58,7 @@ module.exports.CreateFile = async (req, res, next) => {
   }
 };
 
+// Need to Check/Update as per new FrontEnd
 module.exports.UpdateFile = async (req, res, next) => {
   try {
     const { lookingFor, description, oldFileUrl, status } = req.body;
@@ -146,6 +147,7 @@ module.exports.UpdateFile = async (req, res, next) => {
   }
 };
 
+// Need to Check/Update as per new FrontEnd
 module.exports.DeleteSupaFile = async (req, res, next) => {
   try {
     const { id } = req.params;

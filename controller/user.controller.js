@@ -110,6 +110,7 @@ module.exports.searchUser = async (req, res, next) => {
   }
 };
 
+// Need to Check/Update as per new FrontEnd
 module.exports.sendEmail = async(req,res,next)=>{
   try{
     const { email1 } = req.user;
@@ -200,6 +201,7 @@ module.exports.sendEmail = async(req,res,next)=>{
     next(err);
   }
 }
+
 
 module.exports.addTeamMember = async (req, res, next) => {
   try {
@@ -312,6 +314,7 @@ module.exports.updateUser = async (req, res, next) => {
   }
 };
 
+// Need to Check/Update as per new FrontEnd
 module.exports.updateStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
@@ -332,6 +335,7 @@ module.exports.updateStatus = async (req, res, next) => {
   }
 };
 
+// Need to Check/Update as per new FrontEnd
 module.exports.downloadUser = async (req, res, next) => {
   try {
     const { userIds } = req.body;
