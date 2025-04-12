@@ -39,6 +39,12 @@ const userModel = schema(
       type: schema.Types.ObjectId, 
       ref: 'file',
     },
+    status: {
+      type: String,
+      enum: ['new', 'inProgress', 'completed'],
+      required: true,
+      default: 'new',
+    },
   },
   { timestamps: true } 
 );
@@ -56,6 +62,7 @@ const validateUser = (data) => {
         'string.pattern.base': 'Phone number must be valid',
       }),
     websiteLink: Joi.string().uri().optional(),
+    status: Joi.string().valid('new', 'inProgress', 'completed').required(),
   });
 
   return schema.validate(data);
